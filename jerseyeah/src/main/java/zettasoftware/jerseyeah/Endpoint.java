@@ -22,9 +22,27 @@ public class Endpoint {
 	 */
 	private static ArrayList<Position> positions = new ArrayList<Position>();
 
+	
 	/**
 	 * 
-	 * This method is called when no parameters has been passed to the first endpoint.
+	 * This method is called when no parameters has been passed to the endpoint;
+	 * 
+	 * 
+	 */
+	@GET	
+	public Response getEmptyEndpoint() {
+
+		String output = "Use /jerseyeah/rest/endpoint/1/{latitude, longitude} to save a new position.<br/>"
+				+ "Use /jerseyeah/rest/endpoint/2/ to show all saved positions.<br/>"
+				+ "Use /jerseyeah/rest/endpoint/2/maps to show all saved positions on Google Maps.<br/>";	
+		
+
+		return Response.status(200).entity(output).build();
+	}
+	
+	/**
+	 * 
+	 * This method is called when no parameters has been passed to the first endpoint (endpoint/1).
 	 *
 	 */
 	
