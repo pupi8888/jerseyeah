@@ -152,7 +152,7 @@ public class Endpoint {
 			return Response.temporaryRedirect(new URI(url)).entity("").build();
 		} catch (URISyntaxException e) {
 
-			return Response.status(200).entity("Google maps error.").build();
+			return Response.status(500).entity("Google maps error.").build();
 		}
 
 	}
