@@ -8,7 +8,13 @@ import java.util.ArrayList;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import zettasoftware.jerseyeah.model.Position;
 
@@ -22,40 +28,38 @@ public class Endpoint {
 	 */
 	private static ArrayList<Position> positions = new ArrayList<Position>();
 
-	
 	/**
 	 * 
-	 * This method is called when no parameters has been passed to the endpoint;
+	 * This method is called when no parameter has been given to the endpoint.
 	 * 
 	 * 
 	 */
-	@GET	
+	@GET
+	@Produces(MediaType.TEXT_HTML)
 	public Response getEmptyEndpoint() {
 
-		String output = "Use /jerseyeah/rest/endpoint/1/{latitude, longitude} to save a new position.<br/>"
-				+ "Use /jerseyeah/rest/endpoint/2/ to show all saved positions.<br/>"
-				+ "Use /jerseyeah/rest/endpoint/2/maps to show all saved positions on Google Maps.<br/>";	
-		
+		String output = "GET /jerseyeah/rest/endpoint/1/{latitude, longitude} to save a new position.<br/>"
+				+ "GET /jerseyeah/rest/endpoint/2/ to show all saved positions.<br/>"
+				+ "GET /jerseyeah/rest/endpoint/2/maps to show all saved positions on Google Maps.<br/>";
 
 		return Response.status(200).entity(output).build();
 	}
-	
+
 	/**
 	 * 
-	 * This method is called when no parameters has been passed to the first endpoint (endpoint/1).
+	 * This method is called when no parameter has been given to the first
+	 * endpoint (endpoint/1).
 	 *
 	 */
-	
 	@GET
+	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/1") // param has the following format: (latitude, longitude)
 	public Response getEndpoint1() {
 
-		String output = "Empty parameters";	
-		
+		String output = "Empty parameters";
 
 		return Response.status(200).entity(output).build();
 	}
-	
 
 	/**
 	 * 
@@ -63,6 +67,7 @@ public class Endpoint {
 	 * 
 	 **/
 	@GET
+	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/1/{param}") // param has the following format: (latitude, longitude)
 	public Response getEndpoint1(@PathParam("param") String msg) {
 
@@ -92,23 +97,18 @@ public class Endpoint {
 
 	/**
 	 * 
-	 * This method shows all saved positions.
+	 * This method shows all saved positions in JSON format.
 	 * 
 	 **/
 	@GET
+	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/2")
 	public Response getEndpoint2() {
 
 		String output = "";
-
-		if (positions.isEmpty()) {
-			output = "No positions found. Please create one position at least.";
-		} else {
-			output = "The available positions are: <br/>";
-			for (Position p : positions) {
-				output = output + p.getLatitude() + ", " + p.getLongitude() + "<br/>";
-			}
-		}
+		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
+				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
+		output = gson.toJson(positions);
 
 		return Response.status(200).entity(output).build();
 	}
@@ -119,16 +119,25 @@ public class Endpoint {
 	 * 
 	 **/
 	@GET
+	@Produces(MediaType.TEXT_HTML)
 	@Path("/2/maps")
 	public Response getMaps(@PathParam("param") String msg) {
 
-		String url = "../renderMap.html?"; //The webpage location containing the Google Maps API Calls. (src/main/webapp/renderMap.html)
+		if (positions.isEmpty()) {
+			return Response.status(200).entity("No positions found. Please create one position at least.").build();
+		}
+
+		String url = "../renderMap.html?"; // The webpage location containing
+											// the Google Maps API Calls.
+											// (src/main/webapp/renderMap.html)
 		String param = "";
 		int i = 1;
 
 		for (Position p : positions) {
-			//Google Maps API accepts the following url format:
-			//../renderMap.html?q={Position Name}@{latitude,longitude},q={Position Name}@{latitude,longitude},q=.......
+			// Google Maps API accepts the following url format:
+			// ../renderMap.html?q={Position
+			// Name}@{latitude,longitude},q={Position
+			// Name}@{latitude,longitude},q=.......
 			param = "q=Position%20" + i + "@" + p.getLatitude() + "," + p.getLongitude() + "&";
 			url = url + param;
 			i++;
@@ -137,10 +146,9 @@ public class Endpoint {
 		try {
 			return Response.temporaryRedirect(new URI(url)).entity("").build();
 		} catch (URISyntaxException e) {
-			
+
 			return Response.status(200).entity("Google maps error.").build();
 		}
-		
 
 	}
 
