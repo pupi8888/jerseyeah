@@ -68,7 +68,7 @@ public class Endpoint {
 	 **/
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	@Path("/1/{param}") // param has the following format: (latitude, longitude)
+	@Path("/1/{param}") // param must be: (latitude, longitude)
 	public Response getEndpoint1(@PathParam("param") String msg) {
 
 		String output = "";
@@ -79,20 +79,25 @@ public class Endpoint {
 		String params[] = msg.split(",");
 
 		try {
+			
 			double latitude = Double.parseDouble(params[0]);
 			double longitude = Double.parseDouble(params[1]);
 
 			Position p = new Position(latitude, longitude);
 			positions.add(p);
 			output = "Your position " + latitude + ", " + longitude + " has been saved...";
-
+			return Response.status(200).entity(output).build();
+			
 		} catch (Exception ex) {
+			
 			output = paramErrorMessage;
+			return Response.status(500).entity(output).build();
+			
 		}
 
 		// ------
 
-		return Response.status(200).entity(output).build();
+		
 	}
 
 	/**
